@@ -1,5 +1,0 @@
-Bill breakdown: 
-beer:                     ...$2 
-tuna pizza:               ...$6 
-tip:                      ...$1.5 
-total:                    ...$9.50 
