@@ -1,55 +1,98 @@
-//  Interfaces make it possible to treat different types in a similar way
 package main
 
 import (
+	"bufio"
 	"fmt"
-	"math"
+	"os"
+	"strings"
+	"strconv"
 )
 
-// shape interface
-type shape interface {
-	area() float64
-	circumf() float64
+// helper function to get input from the user
+func getInput(prompt string, r *bufio.Reader)(string, error){
+	fmt.Print(prompt)
+	input, err := r.ReadString('\n')
+	return strings.TrimSpace(input), err
 }
 
-type square struct {
-	length float64
-}
-type circle struct {
-	radius float64
+func createBill(name string) bill {
+	// reads the input from the user in the terminal
+	reader := bufio.NewReader(os.Stdin)
+
+	// fmt.Println("Create a new bill name:")
+	// // reads the input after pressed enter
+	// name, _ = reader.ReadString('\n')
+	// name = strings.TrimSpace(name)
+
+	name, _ = getInput("Create a new bill name:", reader)
+
+	b := newBill(name)
+	fmt.Println("Created the bill -", b.name)
+
+	return b
 }
 
-// square methods
-func (s square) area() float64 {
-	return s.length * s.length
-}
-func (s square) circumf() float64 {
-	return s.length * 4
-}
+func promptOptions (b bill) {
+	reader := bufio.NewReader(os.Stdin)
 
-// circle methods
-func (c circle) area() float64 {
-	return math.Pi * c.radius * c.radius
-}
-func (c circle) circumf() float64 {
-	return 2 * math.Pi * c.radius
-}
+	opt, _ := getInput("Choose option (a - add item, s - save bill, t - add tip):", reader)
+	// fmt.Println(opt)
 
-func printShapeInfo(s shape){
-	fmt.Printf("Area of %T is %0.2f \n", s, s.area())
-	fmt.Printf("Circumference of %T is %0.2f \n", s, s.circumf())
-}
+	switch opt {
+		case "a":
+			name, _ := getInput("Item name:", reader)
+			price, _ := getInput("Item price:", reader)
 
-func main(){
-	shapes := []shape{
-		square{length: 15},
-		circle{radius: 10},
-		circle{radius: 5},
-		square{length: 7},
+			// convert the price to a float
+			p, err := strconv.ParseFloat(price, 64)
+			if err != nil {
+				fmt.Println("The price must be a number")
+				promptOptions(b)
+			}
+			b.addItem(name, p)
+
+			fmt.Println(name, price)
+
+			fmt.Println("Item added -", name, price)
+			promptOptions(b)
+		case "t":
+			tip, _ := getInput("Enter tip amount ($):", reader)
+			t, err := strconv.ParseFloat(tip, 64)
+			if err != nil {
+				fmt.Println("The tip must be a number")
+				promptOptions(b)
+			}
+			b.updateTip(t)
+
+			fmt.Println("Tip added:", tip)
+			promptOptions(b)
+		case "s":
+			b.save()
+			fmt.Println("You saved the bill", b)
+		default:
+			fmt.Println("That is not a valid option...")
+			promptOptions(b)
 	}
+}
 
-	for _, v := range shapes {
-		printShapeInfo(v)
-		fmt.Println()
-	}
+func main() {
+	mybill := createBill("Pixie's bill")
+
+	promptOptions(mybill)
+
+	// fmt.Println(mybill)
+
+	// mybill := newBill("Pixie's bill")
+
+	// mybill.addItem("Onion soup", 4.50)
+	// mybill.addItem("veg pie", 8.95)
+	// mybill.addItem("tofu curry", 10.95)
+	// mybill.addItem("pasta", 9.95)
+
+
+	// // adds items to the bill
+	// mybill.updateTip(10)
+
+	// // prints the bill with the formatted string
+	// fmt.Println(mybill.format())
 }
